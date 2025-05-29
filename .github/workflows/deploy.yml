@@ -44,10 +44,10 @@ jobs:
       - name: Deploy dist folder and package.json to server
         run: |
           if [ "${{ secrets.SSH_PASSWORD }}" ]; then
-            sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app
-            sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -r .next public package.json ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app/
+            sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}" "mkdir -p /var/www/nextjs-app"
+            sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -r .next public package.json "${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app/"
           else
-            scp -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app
+            ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app
             scp -o StrictHostKeyChecking=no -r .next public package.json ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app/
           fi
 
