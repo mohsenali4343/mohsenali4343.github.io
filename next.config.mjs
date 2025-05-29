@@ -5,7 +5,7 @@ const nextConfig = {
     unoptimized: true, // ✅ disable Next.js Image Optimization API
   },
   basePath: '', // 👈 important: if your repo is not root domain
-  assetPrefix: '/',
+  assetPrefix: '/', 
 };
 
 export default nextConfig;
