@@ -31,10 +31,25 @@ jobs:
           echo "Host: ${{ secrets.SERVER_IP }}"
           echo "User: ${{ secrets.SSH_USERNAME }}"
 
-      - name: Create deployment folder and copy files to server
+    # Step 6: Ensure the target directory exists on the remote server
+      - name: Ensure remote directory exists
         run: |
-          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "mkdir -p /var/www/nextjs-app"
-          sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -r .next public package.json ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app/
+          if [ "${{ secrets.SSH_PASSWORD }}" ]; then
+            sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "mkdir -p /var/www/nextjs-app"
+          else
+            ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }} "mkdir -p /var/www/nextjs-app"
+          fi
+
+      # Step 7: Transfer /dist folder and package.json to the server using scp
+      - name: Deploy dist folder and package.json to server
+        run: |
+          if [ "${{ secrets.SSH_PASSWORD }}" ]; then
+            sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app
+            sshpass -p "${{ secrets.SSH_PASSWORD }}" scp -o StrictHostKeyChecking=no -r .next public package.json ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app/
+          else
+            scp -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app
+            scp -o StrictHostKeyChecking=no -r .next public package.json ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }}:/var/www/nextjs-app/
+          fi
 
       - name: Install dependencies and restart app on server
         run: |
